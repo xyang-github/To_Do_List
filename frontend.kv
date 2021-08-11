@@ -2,20 +2,21 @@ MDBoxLayout:
     orientation: "vertical"
     padding: 20
     adaptive_height: False
-
     MDTextFieldRound:
+        id: new_task_input
         normal_color: 1, 1, 1, 1
         icon_left: "magnify"
         hint_text: "Type task to be done. Hit Enter to add to list."
+        text:
+        multiline: False
+        on_text_validate: app.new_task()
 
     ScrollView:
         MDList:
             id: scroll_list
             size_hint_y: .85
             padding: 10
-
             OneLineIconListItem:
-
                 IconLeftWidget:
                     icon: "hand-pointing-right"
                 MDCheckbox:

@@ -4,12 +4,13 @@ from kivy.app import App
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.modules import keybinding
+from kivy.uix.floatlayout import FloatLayout
 from kivymd.app import MDApp
 from kivymd.uix.behaviors import TouchBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.list import OneLineIconListItem
 
-Builder.load_file("frontend.kv")
 
 class Database(MDBoxLayout):
     database_path = "todo.db"
@@ -40,7 +41,7 @@ class Database(MDBoxLayout):
         pass
 
 
-class ToDoList(TouchBehavior, OneLineIconListItem):
+class ToDoList(MDBoxLayout):
     def add_task(self):
         pass
 
@@ -57,6 +58,7 @@ class RootWidget(MDBoxLayout):
 
 class MainApp(MDApp):
     def build(self):
+        Builder.load_file("frontend.kv")
         return RootWidget()
 
 

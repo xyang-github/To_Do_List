@@ -1,43 +1,43 @@
 <Database>:
     id: database
     name: "database"
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: 20
-        adaptive_height: False
-        MDTextFieldRound:
-            id: input
-            normal_color: 1, 1, 1, 1
-            icon_left: "magnify"
-            hint_text: "Type task to be done. Hit Enter to add to list."
-            text:
-            multiline: False
-            on_text_validate: root.add_record()
+    orientation: "vertical"
+    padding: 20
+    adaptive_height: False
+    MDTextFieldRound:
+        id: input
+        normal_color: 1, 1, 1, 1
+        icon_left: "magnify"
+        hint_text: "Type task to be done. Hit Enter to add to list."
+        text:
+        multiline: False
+        on_text_validate:
 
 <ToDoList>:
     id: to_do_list
     name: "to_do_list"
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: 20
-        adaptive_height: False
-        ScrollView:
-            MDList:
-                id: scroll_list
-                size_hint_y: .85
-                padding: 10
-                OneLineIconListItem:
-                    IconLeftWidget:
-                        icon: "hand-pointing-right"
-                    MDCheckbox:
-                        pos_hint: {'center_x': .9, 'center_y': .5}
+    orientation: "vertical"
+    padding: 20
+    adaptive_height: False
+    ScrollView:
+        MDList:
+            id: scroll_list
+            padding: 10
+            OneLineIconListItem:
+                IconLeftWidget:
+                    icon: "hand-pointing-right"
+                MDCheckbox:
+                    pos_hint: {'center_x': .9, 'center_y': .5}
 
 <RootWidget>:
+    orientation: "vertical"
     Database:
         id: database
         name: "database"
+        size_hint_y: .15
     ToDoList
         id: to_do_list
         name: "to_do_list"
+        size_hint_y: .85
 
 

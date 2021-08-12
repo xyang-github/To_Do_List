@@ -1,43 +1,33 @@
-<TextBox>:
-    id: textbox
-    name: "textbox"
+<ToDoList>:
     orientation: "vertical"
-    padding: 20
-    adaptive_height: False
-    MDTextFieldRound:
-        id: input
-        normal_color: 1, 1, 1, 1
-        icon_left: "magnify"
-        hint_text: "Type task to be done. Hit Enter to add to list."
-        text:
-        multiline: False
-        on_text_validate: root.add_record()
-
-<TaskList>:
-    id: task_list
-    name: "task_list"
-    orientation: "vertical"
-    padding: 20
-    adaptive_height: False
+    MDBoxLayout:
+        orientation: "horizontal"
+        padding: 20
+        size_hint_y: .1
+        MDIconButton:
+            id: submit
+            icon: "android"
+            user_font_size: "64sp"
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            on_press: root.add_record()
+        MDTextFieldRound:
+            id: input
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            normal_color: 1, 1, 1, 1
+            hint_text: "Type task to be done. Hit Enter to add to list."
+            text:
+            multiline: False
     ScrollView:
         MDList:
             id: scroll_list
-            padding: 10
             OneLineIconListItem:
+                text: "Example"
                 IconLeftWidget:
-                    icon: "hand-pointing-right"
-                MDCheckbox:
-                    pos_hint: {'center_x': .9, 'center_y': .5}
+                    icon: "reminder"
 
-<Home>:
-    orientation: "vertical"
-    TextBox:
-        id: textbox
-        name: "textbox"
-        size_hint_y: .15
-    TaskList
-        id: to_do_list
-        name: "to_do_list"
-        size_hint_y: .85
+<ListItemWithCheckBox>:
+    IconLeftWidget:
+        icon: root.icon
+    RightCheckbox
 
 

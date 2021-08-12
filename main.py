@@ -6,10 +6,12 @@ from kivy.lang import Builder
 from kivy.modules import keybinding
 from kivymd.app import MDApp
 from kivymd.uix.behaviors import TouchBehavior
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.list import OneLineIconListItem
 
+Builder.load_file("frontend.kv")
 
-class Database:
+class Database(MDBoxLayout):
     database_path = "todo.db"
 
     def start_connection(self):
@@ -17,8 +19,19 @@ class Database:
         connection = sqlite3.connect(self.database_path)
         return connection
 
+    def commit_connection(self, connection):
+        """Commit changes and closes connection to database"""
+        self.connection.commit()
+        self.connection.close()
+
     def add_record(self):
-        pass
+        """Adds a new record to the database"""
+        task = self.ids.input.text  # Stores text input into variable
+        self.connection = self.start_connection()
+        self.connection.execute("""
+        INSERT INTO todo VALUES(?)
+        """, [task])
+        self.commit_connection(self.connection)
 
     def edit_record(self):
         pass
@@ -38,12 +51,13 @@ class ToDoList(TouchBehavior, OneLineIconListItem):
         pass
 
 
+class RootWidget(MDBoxLayout):
+    pass
+
+
 class MainApp(MDApp):
     def build(self):
-        return Builder.load_file("frontend.kv")
-
-    def new_task(self):
-        print("hello world")
+        return RootWidget()
 
 
 MainApp().run()

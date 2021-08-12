@@ -1,6 +1,6 @@
-<Database>:
-    id: database
-    name: "database"
+<TextBox>:
+    id: textbox
+    name: "textbox"
     orientation: "vertical"
     padding: 20
     adaptive_height: False
@@ -11,11 +11,11 @@
         hint_text: "Type task to be done. Hit Enter to add to list."
         text:
         multiline: False
-        on_text_validate:
+        on_text_validate: root.add_record()
 
-<ToDoList>:
-    id: to_do_list
-    name: "to_do_list"
+<TaskList>:
+    id: task_list
+    name: "task_list"
     orientation: "vertical"
     padding: 20
     adaptive_height: False
@@ -29,13 +29,13 @@
                 MDCheckbox:
                     pos_hint: {'center_x': .9, 'center_y': .5}
 
-<RootWidget>:
+<Home>:
     orientation: "vertical"
-    Database:
-        id: database
-        name: "database"
+    TextBox:
+        id: textbox
+        name: "textbox"
         size_hint_y: .15
-    ToDoList
+    TaskList
         id: to_do_list
         name: "to_do_list"
         size_hint_y: .85

@@ -1,4 +1,6 @@
 import sqlite3
+
+from kivy.app import App
 from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivymd.app import MDApp
@@ -25,7 +27,6 @@ class RightCheckbox(IRightBodyTouch, MDCheckbox):
 
 
 class ToDoList(MDBoxLayout):
-    database_path = "todo.db"
 
     def add_record(self):
         """Adds a new record to the database"""
@@ -38,6 +39,7 @@ class ToDoList(MDBoxLayout):
         self.connection.commit()
         self.connection.close()
 
+        # Add to list view
         self.ids.scroll_list.add_widget(
             ListItemWithCheckBox(text=f"{self.task}", icon="reminder"))
         self.task = self.ids.input.text = ""  # Deletes text from textbox after adding to record
@@ -49,7 +51,7 @@ class MainApp(MDApp):
         return ToDoList()
 
     def on_start(self):
-        """Need to load the whole database as a list upon start"""
+        """Loads the whole database as a list upon start"""
         connection = Database().start_connection()
         cursor = connection.cursor()
         cursor.execute("""
@@ -57,7 +59,9 @@ class MainApp(MDApp):
         """)
         result = cursor.fetchall()
         connection.close()
-        print(result)  # Work still needs to be done
+        app = App.get_running_app()
+        for item in result:
+            app.root.ids.scroll_list.add_widget(ListItemWithCheckBox(text=item[0]))
 
 
 MainApp().run()

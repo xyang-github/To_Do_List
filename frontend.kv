@@ -23,8 +23,15 @@
 
 
 <ListItemWithCheckBox>:
+    text:
     IconLeftWidget:
         icon: root.icon
-    RightCheckbox
+    RightCheckbox:
+        on_active:
+            root.identifier = root.text
+            app.root.delete_record(root.identifier)
+
+
+
 
 

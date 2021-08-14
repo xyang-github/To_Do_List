@@ -3,7 +3,10 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivymd.app import MDApp
+from kivymd.uix.behaviors import TouchBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import IRightBodyTouch, OneLineAvatarIconListItem
 from kivymd.uix.selectioncontrol import MDCheckbox
 
@@ -17,10 +20,29 @@ class Database:
         return connection
 
 
-class ListItemWithCheckBox(OneLineAvatarIconListItem):
+class ListItemWithCheckBox(OneLineAvatarIconListItem, TouchBehavior):
     """Custom list with an icon as the left widget"""
+    dialog = None
     icon = StringProperty("reminder")
     identifier = StringProperty("")  # stores input text to be used to remove from database
+
+    def on_long_touch(self, *args):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                text="Options:",
+                buttons=[
+                    MDFlatButton(
+                        text="CANCEL", text_color=self.theme_cls.primary_color
+                    ),
+                    MDFlatButton(
+                        text="DELETE", text_color=self.theme_cls.primary_color
+                    ),
+                    MDFlatButton(
+                        text="EDIT", text_color=self.theme_cls.primary_color
+                    )
+                ],
+            )
+        self.dialog.open()
 
 
 class RightCheckbox(IRightBodyTouch, MDCheckbox):
@@ -30,16 +52,19 @@ class RightCheckbox(IRightBodyTouch, MDCheckbox):
 class ToDoList(MDBoxLayout):
 
     def add_record(self):
-        """Adds a new record to the database"""
+        """Adds a new record to the database if textbox is not empty"""
         self.task = self.ids.input.text  # Stores text from 'input' into variable
-        connection = Database().start_connection()
-        cursor = connection.cursor()
-        cursor.execute('INSERT INTO todo VALUES(?)', [self.task])
-        connection.commit()
-        connection.close()
+        if self.task != "":
+            connection = Database().start_connection()
+            cursor = connection.cursor()
+            cursor.execute('INSERT INTO todo VALUES(?)', [self.task])
+            connection.commit()
+            connection.close()
 
-        self.add_to_list_view()
-        self.ids.input.text = ""  # Deletes text from textbox after adding to record
+            self.add_to_list_view()
+            self.ids.input.text = ""  # Deletes text from textbox after adding to record
+        else:
+            return
 
     def add_to_list_view(self):
         """Add to list view"""

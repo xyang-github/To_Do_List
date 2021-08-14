@@ -3,11 +3,12 @@
     MDBoxLayout:
         orientation: "horizontal"
         padding: 20
+        spacing: 10
         size_hint_y: .1
         MDIconButton:
             id: submit
-            icon: "android"
-            user_font_size: "64sp"
+            icon: "plus-box"
+            user_font_size: "32sp"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             on_press: root.add_record()
         MDTextFieldRound:

@@ -1,7 +1,8 @@
 import sqlite3
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, NumericProperty
+from kivy.uix import widget
 from kivymd.app import MDApp
 from kivymd.uix.behaviors import TouchBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -26,13 +27,18 @@ class ListItemWithCheckBox(OneLineAvatarIconListItem, TouchBehavior):
     icon = StringProperty("reminder")
     identifier = StringProperty("")  # stores input text to be used to remove from database
 
-    def on_long_touch(self, *args):
+
+# Somehow the double tap creates two dialog boxes instead of one
+    def on_double_tap(self, *args):
         if not self.dialog:
             self.dialog = MDDialog(
-                text="Options:",
+                title="Options:",
+                size_hint=(0.4, 0.3),
                 buttons=[
                     MDFlatButton(
-                        text="CANCEL", text_color=self.theme_cls.primary_color
+                        text="CANCEL",
+                        text_color=self.theme_cls.primary_color,
+                        on_press=lambda _: self.close_dialog()
                     ),
                     MDFlatButton(
                         text="DELETE", text_color=self.theme_cls.primary_color
@@ -43,6 +49,9 @@ class ListItemWithCheckBox(OneLineAvatarIconListItem, TouchBehavior):
                 ],
             )
         self.dialog.open()
+
+    def close_dialog(self):
+        self.dialog.dismiss()
 
 
 class RightCheckbox(IRightBodyTouch, MDCheckbox):
@@ -62,6 +71,7 @@ class ToDoList(MDBoxLayout):
             connection.close()
 
             self.add_to_list_view()
+
             self.ids.input.text = ""  # Deletes text from textbox after adding to record
         else:
             return
@@ -71,7 +81,7 @@ class ToDoList(MDBoxLayout):
         self.ids.scroll_list.add_widget(
             ListItemWithCheckBox(text=f"{self.task}", icon="reminder"))
 
-    def delete_record(self, widget, identifier):
+    def delete_record(self, identifier):
         """Delete record from the database"""
         connection = Database().start_connection()
         cursor = connection.cursor()
@@ -79,6 +89,7 @@ class ToDoList(MDBoxLayout):
         connection.commit()
         connection.close()
 
+    def remove_from_list_view(self, widget):
         self.ids.scroll_list.remove_widget(widget)
 
 

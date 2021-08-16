@@ -30,7 +30,8 @@
     RightCheckbox:
         on_active:
             root.identifier = root.text
-            app.root.delete_record(root, root.identifier)
+            app.root.delete_record(root.identifier)
+            app.root.remove_from_list_view(root)
 
 
 

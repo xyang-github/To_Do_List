@@ -1,0 +1,12 @@
+TouchHandlerBoxLayout:
+
+  padding: 50, 50
+  on_really_touch_down: app.on_background_touch()
+
+  TouchAwareButton:
+    text: "Button One"
+    on_really_touch_down: app.on_button_touch(self.text)
+
+  TouchAwareButton:
+    text: "Button Two"
+    on_really_touch_down: app.on_button_touch(self.text)

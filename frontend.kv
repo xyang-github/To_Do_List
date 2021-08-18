@@ -18,9 +18,23 @@
             hint_text: "Type task to be done. Hit Enter to add to list."
             text:
             multiline: False
-    ScrollView:
-        MDList:
-            id: scroll_list
+    MDBoxLayout:
+        orientation: "horizontal"
+        size_hint_y: 0.1
+        padding: 10
+        MDLabel:
+            text: "To Do"
+        MDLabel:
+            text: "Completed"
+    MDBoxLayout:
+        orientation: "horizontal"
+        ScrollView:
+            MDList:
+                id: scroll_list
+        ScrollView:
+            MDList:
+                id: complete_list
+
 
 
 <ListItemWithCheckBox>:
@@ -32,7 +46,13 @@
             root.identifier = root.text
             app.root.delete_record(root.identifier)
             app.root.remove_from_list_view(root)
+            app.root.add_to_complete_list(root.identifier)
 
+<CompletedList>:
+    markup: True
+    text:
+    IconLeftWidget:
+        icon: "check-bold"
 
 
 

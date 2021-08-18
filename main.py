@@ -3,12 +3,13 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.properties import StringProperty, NumericProperty
 from kivy.uix import widget
+from kivy.uix.label import Label
 from kivymd.app import MDApp
-from kivymd.uix.behaviors import TouchBehavior
+from kivymd.uix.behaviors import TouchBehavior, CircularRippleBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
-from kivymd.uix.list import IRightBodyTouch, OneLineAvatarIconListItem
+from kivymd.uix.list import IRightBodyTouch, OneLineAvatarIconListItem, IRightBody, OneLineListItem, OneLineIconListItem
 from kivymd.uix.selectioncontrol import MDCheckbox
 
 
@@ -21,37 +22,39 @@ class Database:
         return connection
 
 
+class CompletedList(OneLineAvatarIconListItem):
+    """Custom list with an icon for completed tasks"""
+
+
 class ListItemWithCheckBox(OneLineAvatarIconListItem, TouchBehavior):
     """Custom list with an icon as the left widget"""
     dialog = None
     icon = StringProperty("reminder")
     identifier = StringProperty("")  # stores input text to be used to remove from database
-
-
-# Somehow the double tap creates two dialog boxes instead of one
-    def on_double_tap(self, *args):
-        if not self.dialog:
-            self.dialog = MDDialog(
-                title="Options:",
-                size_hint=(0.4, 0.3),
-                buttons=[
-                    MDFlatButton(
-                        text="CANCEL",
-                        text_color=self.theme_cls.primary_color,
-                        on_press=lambda _: self.close_dialog()
-                    ),
-                    MDFlatButton(
-                        text="DELETE", text_color=self.theme_cls.primary_color
-                    ),
-                    MDFlatButton(
-                        text="EDIT", text_color=self.theme_cls.primary_color
-                    )
-                ],
-            )
-        self.dialog.open()
-
-    def close_dialog(self):
-        self.dialog.dismiss()
+    #
+    # def on_long_touch(self, *args):
+    #     if not self.dialog:
+    #         self.dialog = MDDialog(
+    #             title="Options:",
+    #             size_hint=(0.4, 0.3),
+    #             buttons=[
+    #                 MDFlatButton(
+    #                     text="CANCEL",
+    #                     text_color=self.theme_cls.primary_color,
+    #                     on_press=lambda _: self.close_dialog()
+    #                 ),
+    #                 MDFlatButton(
+    #                     text="DELETE", text_color=self.theme_cls.primary_color
+    #                 ),
+    #                 MDFlatButton(
+    #                     text="EDIT", text_color=self.theme_cls.primary_color
+    #                 )
+    #             ],
+    #         )
+    #     self.dialog.open()
+    #
+    # def close_dialog(self):
+    #     self.dialog.dismiss()
 
 
 class RightCheckbox(IRightBodyTouch, MDCheckbox):
@@ -83,14 +86,21 @@ class ToDoList(MDBoxLayout):
 
     def delete_record(self, identifier):
         """Delete record from the database"""
+
         connection = Database().start_connection()
         cursor = connection.cursor()
+        cursor.execute('INSERT INTO completed (Task) SELECT Task from todo WHERE Task=?', [identifier])
         cursor.execute('DELETE FROM todo WHERE Task=?', [identifier])
         connection.commit()
         connection.close()
 
     def remove_from_list_view(self, widget):
         self.ids.scroll_list.remove_widget(widget)
+
+    def add_to_complete_list(self, completed_task):
+        app = App.get_running_app()  # Return instance of the app
+        app.root.ids.complete_list.add_widget(
+            CompletedList(text=f"[s][i]{completed_task}[/i][/s]", markup=True))
 
 
 class MainApp(MDApp):
@@ -104,12 +114,17 @@ class MainApp(MDApp):
         connection = Database().start_connection()
         cursor = connection.cursor()
         cursor.execute('SELECT * FROM todo')
-        result = cursor.fetchall()  # Stores the whole database into a variable; list of tuples
+        todo_result = cursor.fetchall()  # Stores the whole database into a variable; list of tuples
+        cursor.execute('SELECT * FROM completed')
+        completed_result = cursor.fetchall()
         connection.close()
 
         app = App.get_running_app()  # Return instance of the app
-        for item in result:
+        for item in todo_result:
             app.root.ids.scroll_list.add_widget(ListItemWithCheckBox(text=item[0]))
+
+        for item in completed_result:
+            app.root.ids.complete_list.add_widget(CompletedList(text=f"[s][i]{item[0]}[/i][/s]"))
 
 
 MainApp().run()

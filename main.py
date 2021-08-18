@@ -29,8 +29,20 @@ class Database:
         cursor.execute('INSERT INTO todo VALUES(?)', [task])
         self.commit_close_connection(connection)
 
-    def delete_record(self):
-        pass
+    def delete_record(self, identifier):
+        """Copies record to completed table, then deletes from todo table"""
+        connection = self.start_connection()
+        cursor = connection.cursor()
+        cursor.execute('INSERT INTO completed (Task) SELECT Task from todo WHERE Task=?', [identifier])
+        cursor.execute('DELETE FROM todo WHERE Task=?', [identifier])
+        self.commit_close_connection(connection)
+
+    def clear_completed_records(self):
+        """Clears the 'completed' database"""
+        connection = self.start_connection()
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM completed")
+        self.commit_close_connection(connection)
 
 
 class ListItemWithCheckBox(OneLineAvatarIconListItem, TouchBehavior):
@@ -56,30 +68,19 @@ class ToDoList(MDBoxLayout):
         else:
             return
 
-    def delete_record(self, identifier):
-        """Delete record from the database"""
-
-        connection = Database().start_connection()
-        cursor = connection.cursor()
-        cursor.execute('INSERT INTO completed (Task) SELECT Task from todo WHERE Task=?', [identifier])
-        cursor.execute('DELETE FROM todo WHERE Task=?', [identifier])
-        connection.commit()
-        connection.close()
-
-    def remove_from_list_view(self, widget):
+    def remove_todo_list(self, identifier, widget):
+        """Removes widget from MDList"""
+        Database().delete_record(identifier)
         self.ids.scroll_list.remove_widget(widget)
 
     def add_to_complete_list(self, completed_task):
+        """Add widget to complete_list"""
         self.ids.complete_list.add_widget(
             CompletedList(text=f"[s][i]{completed_task}[/i][/s]", markup=True))
 
     def clear_complete_list(self):
-        connection = Database().start_connection()
-        cursor = connection.cursor()
-        cursor.execute("DELETE FROM completed")
-        connection.commit()
-        connection.close()
-
+        """Deletes all records and widgets from complete db and complete_list"""
+        Database().clear_completed_records()
         self.ids.complete_list.clear_widgets()
 
 

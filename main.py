@@ -1,15 +1,11 @@
 import sqlite3
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.properties import StringProperty, NumericProperty
-from kivy.uix import widget
-from kivy.uix.label import Label
+from kivy.properties import StringProperty
 from kivymd.app import MDApp
-from kivymd.uix.behaviors import TouchBehavior, CircularRippleBehavior
+from kivymd.uix.behaviors import TouchBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.list import IRightBodyTouch, OneLineAvatarIconListItem, IRightBody, OneLineListItem, OneLineIconListItem
+from kivymd.uix.list import IRightBodyTouch, OneLineAvatarIconListItem
 from kivymd.uix.selectioncontrol import MDCheckbox
 
 
@@ -21,15 +17,26 @@ class Database:
         connection = sqlite3.connect(self.database_path)
         return connection
 
+    def commit_close_connection(self, connection):
+        """Commits and closes a pre-existing connection to database"""
+        connection.commit()
+        connection.close()
 
-class CompletedList(OneLineAvatarIconListItem):
-    """Custom list with an icon for completed tasks"""
+    def add_record(self, task):
+        """Add task to to-do database"""
+        connection = self.start_connection()
+        cursor = connection.cursor()
+        cursor.execute('INSERT INTO todo VALUES(?)', [task])
+        self.commit_close_connection(connection)
+
+    def delete_record(self):
+        pass
 
 
 class ListItemWithCheckBox(OneLineAvatarIconListItem, TouchBehavior):
-    """Custom list with an icon as the left widget"""
+    """List widget for to-do tasks"""
     icon = StringProperty("reminder")
-    identifier = StringProperty("")  # stores input text to be used to remove from database
+    identifier = StringProperty("")  # identifies task in the database
 
 
 class RightCheckbox(IRightBodyTouch, MDCheckbox):
@@ -38,26 +45,16 @@ class RightCheckbox(IRightBodyTouch, MDCheckbox):
 
 class ToDoList(MDBoxLayout):
 
-    def add_record(self):
-        """Adds a new record to the database if textbox is not empty"""
+    def add_todo_list(self):
+        """Adds widget to MDList"""
         self.task = self.ids.input.text  # Stores text from 'input' into variable
         if self.task != "":
-            connection = Database().start_connection()
-            cursor = connection.cursor()
-            cursor.execute('INSERT INTO todo VALUES(?)', [self.task])
-            connection.commit()
-            connection.close()
-
-            self.add_to_list_view()
-
+            Database().add_record(self.task)
+            self.ids.scroll_list.add_widget(
+                ListItemWithCheckBox(text=f"{self.task}", icon="reminder"))
             self.ids.input.text = ""  # Deletes text from textbox after adding to record
         else:
             return
-
-    def add_to_list_view(self):
-        """Add to list view"""
-        self.ids.scroll_list.add_widget(
-            ListItemWithCheckBox(text=f"{self.task}", icon="reminder"))
 
     def delete_record(self, identifier):
         """Delete record from the database"""
@@ -84,6 +81,10 @@ class ToDoList(MDBoxLayout):
         connection.close()
 
         self.ids.complete_list.clear_widgets()
+
+
+class CompletedList(OneLineAvatarIconListItem):
+    """Custom list with an icon for completed tasks"""
 
 
 class MainApp(MDApp):

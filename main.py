@@ -86,8 +86,6 @@ class ToDoList(MDBoxLayout):
         self.ids.complete_list.clear_widgets()
 
 
-
-
 class MainApp(MDApp):
 
     def build(self):

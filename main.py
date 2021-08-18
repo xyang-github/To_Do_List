@@ -9,6 +9,7 @@ from kivymd.uix.behaviors import TouchBehavior, CircularRippleBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.label import MDIcon
 from kivymd.uix.list import IRightBodyTouch, OneLineAvatarIconListItem, IRightBody, OneLineListItem, OneLineIconListItem
 from kivymd.uix.selectioncontrol import MDCheckbox
 
@@ -101,6 +102,18 @@ class ToDoList(MDBoxLayout):
         app = App.get_running_app()  # Return instance of the app
         app.root.ids.complete_list.add_widget(
             CompletedList(text=f"[s][i]{completed_task}[/i][/s]", markup=True))
+
+    def clear_completed_list(self):
+        connection = Database().start_connection()
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM completed")
+        connection.commit()
+        connection.close()
+
+        app = App.get_running_app()
+        app.root.ids.complete_list.clear_widgets()
+
+
 
 
 class MainApp(MDApp):

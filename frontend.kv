@@ -23,9 +23,15 @@
         size_hint_y: 0.1
         padding: 10
         MDLabel:
+            halign: "center"
             text: "To Do"
         MDLabel:
+            halign: "center"
             text: "Completed"
+        MDIconButton:
+            icon: "trash-can-outline"
+            on_press: root.clear_complete_list()
+
     MDBoxLayout:
         orientation: "horizontal"
         ScrollView:

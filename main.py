@@ -28,33 +28,8 @@ class CompletedList(OneLineAvatarIconListItem):
 
 class ListItemWithCheckBox(OneLineAvatarIconListItem, TouchBehavior):
     """Custom list with an icon as the left widget"""
-    dialog = None
     icon = StringProperty("reminder")
     identifier = StringProperty("")  # stores input text to be used to remove from database
-    #
-    # def on_long_touch(self, *args):
-    #     if not self.dialog:
-    #         self.dialog = MDDialog(
-    #             title="Options:",
-    #             size_hint=(0.4, 0.3),
-    #             buttons=[
-    #                 MDFlatButton(
-    #                     text="CANCEL",
-    #                     text_color=self.theme_cls.primary_color,
-    #                     on_press=lambda _: self.close_dialog()
-    #                 ),
-    #                 MDFlatButton(
-    #                     text="DELETE", text_color=self.theme_cls.primary_color
-    #                 ),
-    #                 MDFlatButton(
-    #                     text="EDIT", text_color=self.theme_cls.primary_color
-    #                 )
-    #             ],
-    #         )
-    #     self.dialog.open()
-    #
-    # def close_dialog(self):
-    #     self.dialog.dismiss()
 
 
 class RightCheckbox(IRightBodyTouch, MDCheckbox):
@@ -98,9 +73,19 @@ class ToDoList(MDBoxLayout):
         self.ids.scroll_list.remove_widget(widget)
 
     def add_to_complete_list(self, completed_task):
-        app = App.get_running_app()  # Return instance of the app
-        app.root.ids.complete_list.add_widget(
+        self.ids.complete_list.add_widget(
             CompletedList(text=f"[s][i]{completed_task}[/i][/s]", markup=True))
+
+    def clear_complete_list(self):
+        connection = Database().start_connection()
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM completed")
+        connection.commit()
+        connection.close()
+
+        self.ids.complete_list.clear_widgets()
+
+
 
 
 class MainApp(MDApp):

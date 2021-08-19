@@ -55,6 +55,10 @@ class RightCheckbox(IRightBodyTouch, MDCheckbox):
     """Custom right container."""
 
 
+class CompletedList(OneLineAvatarIconListItem):
+    """Custom list with an icon for completed tasks"""
+
+
 class ToDoList(MDBoxLayout):
 
     def add_todo_list(self):
@@ -63,7 +67,7 @@ class ToDoList(MDBoxLayout):
         if self.task != "":
             Database().add_record(self.task)
             self.ids.scroll_list.add_widget(
-                ListItemWithCheckBox(text=f"{self.task}", icon="reminder"))
+                ListItemWithCheckBox(text=f"{self.task}"))
             self.ids.input.text = ""  # Deletes text from textbox after adding to record
         else:
             return
@@ -72,20 +76,25 @@ class ToDoList(MDBoxLayout):
         """Removes widget from MDList"""
         Database().delete_record(identifier)
         self.ids.scroll_list.remove_widget(widget)
+        self.add_to_complete_list(identifier)
 
     def add_to_complete_list(self, completed_task):
         """Add widget to complete_list"""
-        self.ids.complete_list.add_widget(
-            CompletedList(text=f"[s][i]{completed_task}[/i][/s]", markup=True))
+        try:
+            self.ids.complete_list.add_widget(
+                CompletedList(text=f"[s][i]{completed_task}[/i][/s]", markup=True))
+        except TypeError:  # Prevents crashing after completing the first item on start-up with empty completed list
+            connection = Database().start_connection()
+            cursor = connection.cursor()
+            cursor.execute('SELECT Task FROM completed WHERE Task = ?', [completed_task])
+            completed_result = cursor.fetchall()
+            connection.close()
+            self.ids.complete_list.add_widget(CompletedList(text=f"[s][i]{completed_result[0][0]}[/i][/s]"))
 
     def clear_complete_list(self):
         """Deletes all records and widgets from complete db and complete_list"""
         Database().clear_completed_records()
         self.ids.complete_list.clear_widgets()
-
-
-class CompletedList(OneLineAvatarIconListItem):
-    """Custom list with an icon for completed tasks"""
 
 
 class MainApp(MDApp):

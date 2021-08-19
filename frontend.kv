@@ -10,12 +10,12 @@
             icon: "plus-box"
             user_font_size: "32sp"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            on_press: root.add_record()
+            on_press: root.add_todo_list()
         MDTextFieldRound:
             id: input
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             normal_color: 1, 1, 1, 1
-            hint_text: "Type task to be done. Hit Enter to add to list."
+            hint_text: "Type task to be done."
             text:
             multiline: False
     MDBoxLayout:
@@ -29,8 +29,7 @@
             text: "Completed"
         MDIconButton:
             icon: "trash-can-outline"
-            on_press: root.clear_completed_list()
-
+            on_press: root.clear_complete_list()
 
     MDBoxLayout:
         orientation: "horizontal"
@@ -41,8 +40,6 @@
             MDList:
                 id: complete_list
 
-
-
 <ListItemWithCheckBox>:
     text:
     IconLeftWidget:
@@ -50,8 +47,7 @@
     RightCheckbox:
         on_active:
             root.identifier = root.text
-            app.root.delete_record(root.identifier)
-            app.root.remove_from_list_view(root)
+            app.root.remove_todo_list(root.identifier, root)
             app.root.add_to_complete_list(root.identifier)
 
 <CompletedList>:

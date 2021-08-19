@@ -1,16 +1,11 @@
 import sqlite3
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.properties import StringProperty, NumericProperty
-from kivy.uix import widget
-from kivy.uix.label import Label
+from kivy.properties import StringProperty
 from kivymd.app import MDApp
-from kivymd.uix.behaviors import TouchBehavior, CircularRippleBehavior
+from kivymd.uix.behaviors import TouchBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDIcon
-from kivymd.uix.list import IRightBodyTouch, OneLineAvatarIconListItem, IRightBody, OneLineListItem, OneLineIconListItem
+from kivymd.uix.list import IRightBodyTouch, OneLineAvatarIconListItem
 from kivymd.uix.selectioncontrol import MDCheckbox
 
 
@@ -22,40 +17,38 @@ class Database:
         connection = sqlite3.connect(self.database_path)
         return connection
 
+    def commit_close_connection(self, connection):
+        """Commits and closes a pre-existing connection to database"""
+        connection.commit()
+        connection.close()
 
-class CompletedList(OneLineAvatarIconListItem):
-    """Custom list with an icon for completed tasks"""
+    def add_record(self, task):
+        """Add task to to-do database"""
+        connection = self.start_connection()
+        cursor = connection.cursor()
+        cursor.execute('INSERT INTO todo VALUES(?)', [task])
+        self.commit_close_connection(connection)
+
+    def delete_record(self, identifier):
+        """Copies record to completed table, then deletes from todo table"""
+        connection = self.start_connection()
+        cursor = connection.cursor()
+        cursor.execute('INSERT INTO completed (Task) SELECT Task from todo WHERE Task=?', [identifier])
+        cursor.execute('DELETE FROM todo WHERE Task=?', [identifier])
+        self.commit_close_connection(connection)
+
+    def clear_completed_records(self):
+        """Clears the 'completed' database"""
+        connection = self.start_connection()
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM completed")
+        self.commit_close_connection(connection)
 
 
 class ListItemWithCheckBox(OneLineAvatarIconListItem, TouchBehavior):
-    """Custom list with an icon as the left widget"""
-    dialog = None
+    """List widget for to-do tasks"""
     icon = StringProperty("reminder")
-    identifier = StringProperty("")  # stores input text to be used to remove from database
-    #
-    # def on_long_touch(self, *args):
-    #     if not self.dialog:
-    #         self.dialog = MDDialog(
-    #             title="Options:",
-    #             size_hint=(0.4, 0.3),
-    #             buttons=[
-    #                 MDFlatButton(
-    #                     text="CANCEL",
-    #                     text_color=self.theme_cls.primary_color,
-    #                     on_press=lambda _: self.close_dialog()
-    #                 ),
-    #                 MDFlatButton(
-    #                     text="DELETE", text_color=self.theme_cls.primary_color
-    #                 ),
-    #                 MDFlatButton(
-    #                     text="EDIT", text_color=self.theme_cls.primary_color
-    #                 )
-    #             ],
-    #         )
-    #     self.dialog.open()
-    #
-    # def close_dialog(self):
-    #     self.dialog.dismiss()
+    identifier = StringProperty("")  # identifies task in the database
 
 
 class RightCheckbox(IRightBodyTouch, MDCheckbox):
@@ -64,56 +57,35 @@ class RightCheckbox(IRightBodyTouch, MDCheckbox):
 
 class ToDoList(MDBoxLayout):
 
-    def add_record(self):
-        """Adds a new record to the database if textbox is not empty"""
+    def add_todo_list(self):
+        """Adds widget to MDList"""
         self.task = self.ids.input.text  # Stores text from 'input' into variable
         if self.task != "":
-            connection = Database().start_connection()
-            cursor = connection.cursor()
-            cursor.execute('INSERT INTO todo VALUES(?)', [self.task])
-            connection.commit()
-            connection.close()
-
-            self.add_to_list_view()
-
+            Database().add_record(self.task)
+            self.ids.scroll_list.add_widget(
+                ListItemWithCheckBox(text=f"{self.task}", icon="reminder"))
             self.ids.input.text = ""  # Deletes text from textbox after adding to record
         else:
             return
 
-    def add_to_list_view(self):
-        """Add to list view"""
-        self.ids.scroll_list.add_widget(
-            ListItemWithCheckBox(text=f"{self.task}", icon="reminder"))
-
-    def delete_record(self, identifier):
-        """Delete record from the database"""
-
-        connection = Database().start_connection()
-        cursor = connection.cursor()
-        cursor.execute('INSERT INTO completed (Task) SELECT Task from todo WHERE Task=?', [identifier])
-        cursor.execute('DELETE FROM todo WHERE Task=?', [identifier])
-        connection.commit()
-        connection.close()
-
-    def remove_from_list_view(self, widget):
+    def remove_todo_list(self, identifier, widget):
+        """Removes widget from MDList"""
+        Database().delete_record(identifier)
         self.ids.scroll_list.remove_widget(widget)
 
     def add_to_complete_list(self, completed_task):
-        app = App.get_running_app()  # Return instance of the app
-        app.root.ids.complete_list.add_widget(
+        """Add widget to complete_list"""
+        self.ids.complete_list.add_widget(
             CompletedList(text=f"[s][i]{completed_task}[/i][/s]", markup=True))
 
-    def clear_completed_list(self):
-        connection = Database().start_connection()
-        cursor = connection.cursor()
-        cursor.execute("DELETE FROM completed")
-        connection.commit()
-        connection.close()
-
-        app = App.get_running_app()
-        app.root.ids.complete_list.clear_widgets()
+    def clear_complete_list(self):
+        """Deletes all records and widgets from complete db and complete_list"""
+        Database().clear_completed_records()
+        self.ids.complete_list.clear_widgets()
 
 
+class CompletedList(OneLineAvatarIconListItem):
+    """Custom list with an icon for completed tasks"""
 
 
 class MainApp(MDApp):

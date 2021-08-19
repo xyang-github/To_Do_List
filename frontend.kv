@@ -3,31 +3,60 @@
     MDBoxLayout:
         orientation: "horizontal"
         padding: 20
+        spacing: 10
         size_hint_y: .1
         MDIconButton:
             id: submit
-            icon: "android"
-            user_font_size: "64sp"
+            icon: "plus-box"
+            user_font_size: "32sp"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            on_press: root.add_record()
+            on_press: root.add_todo_list()
         MDTextFieldRound:
             id: input
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             normal_color: 1, 1, 1, 1
-            hint_text: "Type task to be done. Hit Enter to add to list."
+            hint_text: "Type task to be done."
             text:
             multiline: False
-    ScrollView:
-        MDList:
-            id: scroll_list
-            OneLineIconListItem:
-                text: "Example"
-                IconLeftWidget:
-                    icon: "reminder"
+    MDBoxLayout:
+        orientation: "horizontal"
+        size_hint_y: 0.1
+        padding: 10
+        MDLabel:
+            halign: "center"
+            text: "To Do"
+        MDLabel:
+            halign: "center"
+            text: "Completed"
+        MDIconButton:
+            icon: "trash-can-outline"
+            on_press: root.clear_complete_list()
+
+    MDBoxLayout:
+        orientation: "horizontal"
+        ScrollView:
+            MDList:
+                id: scroll_list
+        ScrollView:
+            MDList:
+                id: complete_list
 
 <ListItemWithCheckBox>:
+    text:
     IconLeftWidget:
         icon: root.icon
-    RightCheckbox
+    RightCheckbox:
+        on_active:
+            root.identifier = root.text
+            app.root.remove_todo_list(root.identifier, root)
+            app.root.add_to_complete_list(root.identifier)
+
+<CompletedList>:
+    markup: True
+    text:
+    IconLeftWidget:
+        icon: "check-bold"
+
+
 
 

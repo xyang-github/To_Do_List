@@ -108,6 +108,8 @@ class MainApp(MDApp):
         """Loads the whole database as a list upon start"""
         connection = Database().start_connection()
         cursor = connection.cursor()
+        cursor.execute("CREATE TABLE if not exists todo(Task text)")
+        cursor.execute("CREATE TABLE if not exists completed(Task text)")
         cursor.execute('SELECT * FROM todo')
         todo_result = cursor.fetchall()  # Stores the whole database into a variable; list of tuples
         cursor.execute('SELECT * FROM completed')

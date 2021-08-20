@@ -8,27 +8,37 @@
         MDIconButton:
             id: submit
             icon: "plus-box"
+            theme_text_color: "Custom"
+            text_color: app.theme_cls.primary_color
             user_font_size: "32sp"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             on_press: root.add_todo_list()
         MDTextFieldRound:
             id: input
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            normal_color: 1, 1, 1, 1
+            normal_color: 0,0,0,0
             hint_text: "Type task to be done."
             text:
             multiline: False
     MDBoxLayout:
         orientation: "horizontal"
         size_hint_y: 0.1
+        padding: 10
         MDLabel:
             halign: "center"
+            theme_text_color: "Secondary"
+            font_style: "Button"
+            md_bg_color: .78, .9, .8, 1
             text: "To Do"
         MDLabel:
             halign: "center"
+            theme_text_color: "Secondary"
+            font_style: "Button"
             text: "Completed"
         MDIconButton:
             icon: "trash-can-outline"
+            theme_text_color: "Custom"
+            text_color: .11, .37, .13, 1
             on_press: root.clear_complete_list()
 
     MDBoxLayout:
@@ -44,6 +54,8 @@
     text:
     IconLeftWidget:
         icon: root.icon
+        theme_text_color: "Custom"
+        text_color: app.theme_cls.primary_dark
     RightCheckbox:
         on_active:
             root.identifier = root.text
@@ -54,6 +66,8 @@
     text:
     IconLeftWidget:
         icon: "check-bold"
+        theme_text_color: "Custom"
+        text_color: app.theme_cls.primary_light
 
 
 

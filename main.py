@@ -100,6 +100,7 @@ class ToDoList(MDBoxLayout):
 class MainApp(MDApp):
 
     def build(self):
+        self.theme_cls.primary_palette = "Green"
         Builder.load_file("frontend.kv")
         return ToDoList()
 
